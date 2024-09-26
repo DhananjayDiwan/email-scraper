@@ -1,6 +1,3 @@
-If you're using the Apache 2.0 License for your project, here’s how to modify the `README.md` to reflect that instead of the MIT License:
-
-```markdown
 # Asynchronous Email Scraper with Progress Bar
 
 This project is an asynchronous email scraper that extracts email addresses from web pages. It supports multiple URLs and displays a progress bar to track the scraping process.
