@@ -1,3 +1,4 @@
+import time
 from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
@@ -6,8 +7,7 @@ import re
 import aiohttp
 import asyncio
 
-
-# unique emails for the final result of emal
+# unique emails for the final result of emails
 unique_emails = set()
 
 
@@ -44,36 +44,28 @@ async def find_emails(session, url):
 # Function to process a list of URLs and find emails
 async def process_urls(urls):
     async with aiohttp.ClientSession() as session:
-        tasks = [find_emails(session, url) for url in urls]
-        results = await asyncio.gather(*tasks)
-        for email_set in results:
-            unique_emails.update(email_set)
-            
-        # for url, email_list in zip(urls, results):
-        #     print(f"Emails found on {url}: {email_list}")
+        # Initialize the tqdm progress bar with the total number of URLs
+        with tqdm(total=len(urls), desc="Processing URLs") as pbar:
+            tasks = [find_emails(session, url) for url in urls]
+            for future in asyncio.as_completed(tasks):
+                result = await future
+                unique_emails.update(result)
+                # Update progress bar each time a task is completed
+                pbar.update(1)
 
-
-# get_htmlcontecnt for geting url list on pages
-
-def get_htmlcontecnt(url):
-    # for get request  
+# get_htmlcontent for getting URL list on pages
+def get_htmlcontent(url):
+    # Get request  
     r = requests.get(url)
     soup = BeautifulSoup(r.content, 'html.parser')
     links = [a['href'] for a in soup.find_all('a', href=True)]
     asyncio.run(process_urls(links))
-    
-    # code for only with that domain
-    
-    # base_url = urlparse(url).netloc
-    # urls = [link for link in links if base_url in urlparse(link).netloc]
-    
+    # Code for only with that domain can be added if necessary
 
 if __name__ == "__main__":
-    urlinput = input("url : ")
+    urlinput = input("Enter url : ")
     url = format_url(urlinput)
-    get_htmlcontecnt(url)
-    
-    # Print unique emails found
+    get_htmlcontent(url)
     print(f"Total unique emails found: {len(unique_emails)}")
     for email in unique_emails:
         print(email)
