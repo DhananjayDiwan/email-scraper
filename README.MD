@@ -15,7 +15,7 @@ This project is an asynchronous email scraper that extracts email addresses from
 ## Requirements
 
 Make sure you have the following Python libraries installed:
-
+S
 - `requests`: To fetch the main page for scraping links.
 - `aiohttp`: For asynchronous HTTP requests.
 - `beautifulsoup4`: To parse the HTML content.
