@@ -1,4 +1,3 @@
-import time
 from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
@@ -11,15 +10,17 @@ import asyncio
 # unique emails for the final result of emal
 unique_emails = set()
 
+
 def format_url(url):
     # Correct common domain typos (e.g., ".xom" -> ".com")
     url = re.sub(r"\.xom$", ".com", url)
 
-    # Check if the URL starts with http/https, if not add "http://"
-    if not re.match(r'http[s]?://', url):
+    # Check if the URL starts with http/https/ftp/mailto, if not add "http://"
+    if not re.match(r'http[s]?://|ftp://|mailto:', url):
         url = f"https://{url}"
 
     return url
+
 
 
 # Function to find emails on a given URL
@@ -55,15 +56,12 @@ async def process_urls(urls):
 # get_htmlcontecnt for geting url list on pages
 
 def get_htmlcontecnt(url):
-    # Start measuring time
-    start_time = time.time()
     # for get request  
     r = requests.get(url)
     soup = BeautifulSoup(r.content, 'html.parser')
     links = [a['href'] for a in soup.find_all('a', href=True)]
-    for i in tqdm(links, desc="Processing", bar_format="{l_bar}{bar} [Elapsed: {elapsed}, Remaining: {remaining}]"):
-        time.sleep(0.1)
     asyncio.run(process_urls(links))
+    
     # code for only with that domain
     
     # base_url = urlparse(url).netloc
@@ -74,7 +72,8 @@ if __name__ == "__main__":
     urlinput = input("url : ")
     url = format_url(urlinput)
     get_htmlcontecnt(url)
-
+    
+    # Print unique emails found
+    print(f"Total unique emails found: {len(unique_emails)}")
     for email in unique_emails:
-        elapsed_time = time.time() 
         print(email)
