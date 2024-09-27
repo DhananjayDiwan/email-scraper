@@ -1,25 +1,26 @@
 # Asynchronous Email Scraper with Progress Bar
 
-This project is an asynchronous email scraper that extracts email addresses from web pages. It supports multiple URLs and displays a progress bar to track the scraping process.
+This project is an asynchronous email scraper designed to extract email addresses from web pages efficiently. It supports multiple URLs, including those read from a file, and displays a progress bar to track the scraping process.
 
 ## Features
 
-- **Asynchronous requests**: Faster scraping using Python's `asyncio` and `aiohttp`.
-- **Email filtering**: Extracts valid email addresses while excluding unwanted patterns like image extensions.
-- **Progress bar**: A progress bar using the `tqdm` library shows the scraping progress in real time.
-- **Error handling**: Skips over any URLs that can't be reached or return errors.
+- **Asynchronous Requests**: Utilizes Python's `asyncio` and `aiohttp` for fast and concurrent web scraping.
+- **Email Filtering**: Extracts valid email addresses and excludes unwanted patterns such as image file extensions.
+- **Progress Bar**: Displays a real-time progress bar using the `tqdm` library to indicate scraping progress.
+- **File Input Support**: Can read a list of URLs from a file (`urls.txt`), in addition to direct URL input.
+- **Error Handling**: Skips over URLs that can't be reached or result in errors.
 
 ## Requirements
 
-Make sure you have the following Python libraries installed:
-S
-- `requests`: To fetch the main page for scraping links.
-- `aiohttp`: For asynchronous HTTP requests.
-- `beautifulsoup4`: To parse the HTML content.
-- `tqdm`: To display the progress bar.
-- `re`: Regular expression for email pattern matching.
+Ensure you have the following Python libraries installed:
 
-You can install all dependencies using the following command:
+- `requests`: For fetching the main page to scrape links.
+- `aiohttp`: For making asynchronous HTTP requests.
+- `beautifulsoup4`: For parsing HTML content.
+- `tqdm`: For displaying the progress bar.
+- `re`: For regular expression-based email pattern matching.
+
+Install all dependencies using the following command:
 
 ```bash
 pip install requests aiohttp beautifulsoup4 tqdm
@@ -27,35 +28,42 @@ pip install requests aiohttp beautifulsoup4 tqdm
 
 ## How It Works
 
-1. The user enters a URL to scrape.
-2. The scraper extracts all links from the provided URL.
-3. For each extracted link, it fetches the page content and looks for email addresses using a regular expression.
-4. It filters out any invalid email addresses, such as those ending with image or media file extensions.
-5. A progress bar is displayed to show the completion percentage as the scraper processes each URL.
-6. All unique email addresses found are displayed once scraping is complete.
+1. **Input Selection**: You can provide a single URL directly or a file containing multiple URLs.
+2. **Link Extraction**: The scraper extracts all links from the provided URL(s).
+3. **Email Extraction**: For each extracted link, it fetches the page content and searches for email addresses using regular expressions.
+4. **Filtering**: The scraper filters out invalid email addresses, such as those ending with image or media file extensions.
+5. **Progress Tracking**: A progress bar is displayed to show the completion percentage as URLs are processed.
+6. **Results**: All unique email addresses found are printed once the scraping is complete.
 
 ## Usage
 
-1. Run the script by executing the following command:
+1. **Run the Script**: Execute the script with a single URL or a file containing URLs:
 
-```bash
-python email_scraper.py
-```
+   ```bash
+   python email_scraper.py <url_or_file>
+   ```
 
-2. You will be prompted to enter a URL:
+   - To input a single URL:
+     ```bash
+     python email_scraper.py https://example.com
+     ```
 
-```
-Enter url : https://example.com
-```
+   - To use a file with URLs (e.g., `urls.txt`), ensure each URL is on a new line:
+     ```bash
+     python email_scraper.py urls.txt
+     ```
 
-3. The scraper will fetch and process the links on the given URL, displaying the progress in real time.
+2. **Input Prompt**: If providing a single URL, you will be prompted to enter it directly:
+   
+   ```
+   Enter URL: https://example.com
+   ```
 
-4. Once completed, the unique emails found will be printed in the terminal.
+3. **Output**: The scraper will process the URLs and display the progress in real time. Once completed, the unique email addresses found will be listed in the terminal.
 
 ## Example Output
 
 ```
-url : https://example.com
 Processing URLs: 100%|██████████████████████████████████| 50/50 [00:05<00:00,  9.22it/s]
 Total unique emails found: 5
 example1@example.com
@@ -67,21 +75,21 @@ info@website.com
 
 ### Main Components
 
-- **`format_url(url)`**: Normalizes the URL, ensuring it starts with `http://` or `https://` and correcting common domain typos (like `.xom` to `.com`).
+- **`format_url(url)`**: Normalizes URLs, ensuring they start with `http://` or `https://` and correcting common domain typos (e.g., `.xom` to `.com`).
   
-- **`find_emails(session, url)`**: Asynchronously fetches the content of a given URL and extracts valid email addresses using regular expressions. It filters out emails with unwanted file extensions (like `.jpg`, `.png`, etc.).
+- **`find_emails(session, url)`**: Asynchronously fetches the content of a URL and extracts valid email addresses using regular expressions. It filters out emails with unwanted file extensions.
 
-- **`process_urls(urls)`**: Handles the asynchronous processing of all URLs and displays the progress using `tqdm`.
+- **`process_urls(urls)`**: Manages the asynchronous processing of URLs and displays the progress using `tqdm`.
 
-- **`get_htmlcontent(url)`**: Fetches the HTML content from the main URL and extracts all the hyperlinks on the page.
+- **`get_htmlcontent(url)`**: Fetches HTML content from a URL and extracts hyperlinks on the page.
+
+- **`process_urls_from_file(filename)`**: Reads URLs from a file, with each URL on a new line.
 
 ## Customization
 
 ### Filtering Email Patterns
 
-You can customize the regular expression in the `find_emails()` function to match specific email formats or add additional filters as needed.
-
-For example, to exclude additional file types or domain patterns, modify the `exclude_pattern`:
+You can customize the regular expression in the `find_emails()` function to match specific email formats or exclude additional patterns. Modify the `exclude_pattern` to add more file types or domain patterns.
 
 ```python
 exclude_pattern = r'@.*\.(jpg|jpeg|png|...)$'
@@ -89,7 +97,7 @@ exclude_pattern = r'@.*\.(jpg|jpeg|png|...)$'
 
 ### Limiting URLs to a Specific Domain
 
-If you want to limit scraping to URLs from the same domain as the input URL, uncomment and modify the relevant code section in the `get_htmlcontent(url)` function.
+To limit scraping to URLs from the same domain as the input URL, you can modify the `get_htmlcontent(url)` function accordingly.
 
 ## License
 
