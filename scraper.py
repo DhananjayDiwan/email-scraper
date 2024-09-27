@@ -1,4 +1,5 @@
 
+from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
@@ -55,6 +56,12 @@ def get_htmlcontent(url):
     soup = BeautifulSoup(r.content, 'html.parser')
     links = [a['href'] for a in soup.find_all('a', href=True)]
     formatted_links = [format_url(link) for link in links]
+    
+     # code for only with that domain
+     
+    # base_url = urlparse(url).netloc
+    # formatted_links = [link for link in links if base_url in urlparse(link).netloc]
+    
     return formatted_links
 
 # Process URLs from a file
