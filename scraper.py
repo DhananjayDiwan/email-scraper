@@ -1,23 +1,24 @@
-# importing the libires
+
 import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import re
 import aiohttp
 import asyncio
+import sys
 
-# unique emails for the final result of emails
+# Unique emails for the final result
 unique_emails = set()
 
-# url fomat for proper url like https://example.com
+# URL format for proper URL like https://example.com
 def format_url(url):
-    url = re.sub(r"\.xom$", ".com", url)# Correct common domain typos (e.g., ".xom" -> ".com")
-    if not re.match(r'http[s]?://|ftp://|mailto:', url):  # Check if the URL starts with http/https/ftp/mailto, if not add "http://"
+    url = re.sub(r"\.xom$", ".com", url)  # Correct common domain typos
+    if not re.match(r'http[s]?://|ftp://|mailto:', url):
         url = f"https://{url}"
         
     return url 
 
-# Function to find emails on a given URL LIST
+# Function to find emails on a given URL
 async def find_emails(session, url):
     emails = []
     try:
@@ -28,8 +29,8 @@ async def find_emails(session, url):
                 exclude_pattern = r'@.*\.(jpg|jpeg|png|gif|bmp|webp|tiff|svg|ico|heif|raw|mp4|avi|mov|wmv|flv|mkv)$'
                 emails = re.findall(email_pattern, text)
                 emails = [item for item in emails if re.fullmatch(
-                    email_pattern, item) and not re.search(exclude_pattern, item)]    
-                          
+                    email_pattern, item) and not re.search(exclude_pattern, item)]
+                
     except Exception as e:
         # print(f"Error fetching {url}: {e}")
         ...
@@ -38,32 +39,57 @@ async def find_emails(session, url):
 # Function to process a list of URLs and find emails
 async def process_urls(urls):
     async with aiohttp.ClientSession() as session:
-        # Initialize the tqdm progress bar with the total number of URLs
+        
         with tqdm(total=len(urls), desc="Processing URLs") as pbar:
             tasks = [find_emails(session, url) for url in urls]
             for future in asyncio.as_completed(tasks):
                 result = await future
                 unique_emails.update(result)
-                # Update progress bar each time a task is completed
+                
                 pbar.update(1)
 
-# get_htmlcontent for getting URL list on pages
+# Get HTML content and extract URLs
 def get_htmlcontent(url):
-    # Get request  
+    
     r = requests.get(url)
     soup = BeautifulSoup(r.content, 'html.parser')
     links = [a['href'] for a in soup.find_all('a', href=True)]
-    asyncio.run(process_urls(links))
-    
+    formatted_links = [format_url(link) for link in links]
+    return formatted_links
 
-# application of this a
-if __name__ == "__main__":
-    urlinput = input("Enter url : ")
-    url = format_url(urlinput)
-    get_htmlcontent(url)
+# Process URLs from a file
+def process_urls_from_file(filename):
+    with open(filename, 'r') as file:
+        urls = [line.strip() for line in file]
+    return urls
+
+# Main function to handle input and processing
+async def main(input_path):
+    if input_path.endswith('.txt'):
+        urls = process_urls_from_file(input_path)
+    else:
+        urls = [format_url(input_path)]
+
+    all_links = []
+    for url in urls:
+        all_links.extend(get_htmlcontent(url))
     
+    # Remove duplicates and format links
+    all_links = list(set(all_links))
+    all_links = [format_url(link) for link in all_links]
     
-# Print all result and found email
+    await process_urls(all_links)
+    
+    # Print all result and found emails
     print(f"Total unique emails found: {len(unique_emails)}")
     for email in unique_emails:
         print(email)
+
+# Application entry point
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python web_scraper.py <url_or_file>")
+        sys.exit(1)
+    
+    input_path = sys.argv[1]
+    asyncio.run(main(input_path))
